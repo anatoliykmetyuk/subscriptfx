@@ -16,6 +16,5 @@ object SSPlatform {
   script..
     runAndWait(task: => Unit) =
       val trigger = triggerFor(task)
-      Platform.runLater(trigger.task)
-      trigger
+      trigger && Platform.runLater(trigger.task)
 }
