@@ -9,13 +9,13 @@ import scala.collection.mutable.{Buffer, ListBuffer}
 
 import javafx.{application => jfxa}
 
-import scalafx.application.JFXApp
+import scalafx.application.{JFXApp, Platform}
 
 object SSFXApp {
   def app = JFXApp.ACTIVE_APP.asInstanceOf[SSFXApp]
 }
 
-trait SSFXApp extends JFXApp with SSProcess {
+trait SSFXApp extends JFXApp with SSProcess {self =>
 
   private val subClassInitCode1 = new ListBuffer[() => Unit]
 
@@ -34,21 +34,20 @@ trait SSFXApp extends JFXApp with SSProcess {
 
   def initialize(): Unit = for (initCode <- subClassInitCode1) initCode()
 
+  val thread = new Thread (new Runnable {override def run() {
+    runScript(self)
+  }})
+
+  override script lifecycle =
+    super.lifecycle
+    Platform.exit()
+
 }
 
 private[subscriptfx] class AppHelper extends javafx.application.Application {
   def start(stage: javafx.stage.Stage) {
     JFXApp.STAGE = stage
     SSFXApp.app.initialize()
-
-    runScript(SSFXApp.app)
-
-    // if (JFXApp.AUTO_SHOW) {
-    //   JFXApp.STAGE.show()
-    // }
-  }
-
-  override def stop() {
-    JFXApp.ACTIVE_APP.stopApp()
+    SSFXApp.app.thread.start()
   }
 }
