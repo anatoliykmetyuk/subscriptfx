@@ -1,4 +1,4 @@
-package subscriptfx.demos.helloworld
+package subscriptfx.demos
 
 import subscript.language
 import subscript.Predef._
@@ -16,12 +16,12 @@ import subscriptfx._
 
 // Main SubScriptFX Application
 object HelloWorld extends SSFXApp {
-  val stg = new MainStage  // GUI creation must be done from the event thread! HelloWorld is initialized from event thread.
+  val stg = new HelloWorldStage  // GUI creation must be done from the event thread! HelloWorld is initialized from event thread.
 
   script live = stg  // MainStage is a process object, it will be implicitly converted to a script
 }
 
-class MainStage extends Stage with StageP {
+class HelloWorldStage extends Stage with StageP {
   // View
   scene = new Scene {
     root = new BorderPane {
