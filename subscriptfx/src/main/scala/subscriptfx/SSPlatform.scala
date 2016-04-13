@@ -14,6 +14,7 @@ object SSPlatform {
   def triggerFor(task: => Unit) = ExecutionTrigger(() => task)
 
   script..
+    /** Executes the task on the JavaFX event thread. Waits for it to finish before returning. */
     runAndWait(task: => Unit) =
       val trigger = triggerFor(task)
       trigger && {!val t = trigger;Platform.runLater(t.task)!}  // runLater accepts a by-name parameter. So we need to materialize

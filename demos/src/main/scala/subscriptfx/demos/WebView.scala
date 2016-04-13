@@ -55,6 +55,6 @@ class WebDemoStage extends Stage with StageP {
   }
 
   script live =
-    SSPlatform.runAndWait: browser.engine.load("http://code.google.com/p/scalafx/")
+    gui: browser.engine.load("http://code.google.com/p/scalafx/")
     {..}
 }
