@@ -32,4 +32,5 @@ class HelloWorldStage extends Stage with StageP {
 
   // Control
   script live = {..}
+
 }

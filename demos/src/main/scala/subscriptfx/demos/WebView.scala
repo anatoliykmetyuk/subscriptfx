@@ -35,16 +35,13 @@ class WebDemoStage extends Stage with StageP {
     onResized = (e: WebEvent[_]) => println("onResized: " + e)
     onVisibilityChanged = (e: WebEvent[_]) => println("onVisibilityChanged: " + e)
   }
-
-  val engine = browser.engine
-  engine.load("http://code.google.com/p/scalafx/")
   
   val txfUrl = new TextField {
-    text = engine.location.value
+    text = browser.engine.location.value
     hgrow = Priority.Always
     vgrow = Priority.Never
   }
-  txfUrl.onAction = handle {engine.load(txfUrl.text.get)}
+  txfUrl.onAction = handle {browser.engine.load(txfUrl.text.get)}
 
 
   scene = new Scene {
@@ -57,5 +54,7 @@ class WebDemoStage extends Stage with StageP {
     }
   }
 
-  script live = {..}
+  script live =
+    SSPlatform.runAndWait: browser.engine.load("http://code.google.com/p/scalafx/")
+    {..}
 }

@@ -16,5 +16,7 @@ object SSPlatform {
   script..
     runAndWait(task: => Unit) =
       val trigger = triggerFor(task)
-      trigger && Platform.runLater(trigger.task)
+      trigger && {!val t = trigger;Platform.runLater(t.task)!}  // runLater accepts a by-name parameter. So we need to materialize
+                                                                // the trigger early, since its node will not be available on
+                                                                // evaluation time.
 }
