@@ -2,6 +2,7 @@ package subscriptfx.demos
 
 import subscript.language
 import subscript.Predef._
+import subscript.objectalgebra._
 import subscriptfx._
 
 import scalafx.Includes._
@@ -41,7 +42,7 @@ class WebDemoStage extends Stage with StageP {
     hgrow = Priority.Always
     vgrow = Priority.Never
   }
-  txfUrl.onAction = handle {browser.engine.load(txfUrl.text.get)}
+  txfUrl.onAction = handle {txfUrlAction.trigger}
 
 
   scene = new Scene {
@@ -54,7 +55,9 @@ class WebDemoStage extends Stage with StageP {
     }
   }
 
+  val txfUrlAction = new Trigger
+
   script live =
     gui: browser.engine.load("http://code.google.com/p/scalafx/")
-    {..}
+    txfUrlAction gui: browser.engine.load(txfUrl.text.get) ...
 }

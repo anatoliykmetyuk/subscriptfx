@@ -19,5 +19,5 @@ object SSPlatform {
       val trigger = triggerFor(task)
       trigger && {!val t = trigger;Platform.runLater(t.task)!}  // runLater accepts a by-name parameter. So we need to materialize
                                                                 // the trigger early, since its node will not be available on
-                                                                // evaluation time.
+                                                                // evaluation time. See: http://anatoliykmetyuk.github.io/blog/2016/04/13/subscript-values-in-by-name-calls.html
 }
