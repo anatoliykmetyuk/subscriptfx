@@ -8,6 +8,9 @@ import subscript.vm.N_code_eventhandling
 import javafx.event.{EventHandler, ActionEvent, Event}
 import javafx.beans.property.ObjectProperty
 
+import scalafx.Includes._
+import scalafx.{event => sfx}
+
 
 package object subscriptfx {
   object Listeners {
@@ -31,7 +34,7 @@ package object subscriptfx {
 
   implicit script..
     op2script(handlerProp: ObjectProperty[_ <: EventHandler[_]]) =
-      var event: Event = null
+      var event: sfx.Event = null
       @{
         val handler = {e: Event =>
           event = e

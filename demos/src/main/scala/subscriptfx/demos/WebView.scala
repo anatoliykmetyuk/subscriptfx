@@ -31,10 +31,6 @@ class WebDemoStage extends Stage with StageP {
   val browser = new WebView {
     hgrow = Priority.Always
     vgrow = Priority.Always
-    onAlert = (e: WebEvent[_]) => println("onAlert: " + e)
-    onStatusChanged = (e: WebEvent[_]) => println("onStatusChanged: " + e)
-    onResized = (e: WebEvent[_]) => println("onResized: " + e)
-    onVisibilityChanged = (e: WebEvent[_]) => println("onVisibilityChanged: " + e)
   }
   
   val txfUrl = new TextField {
@@ -42,8 +38,6 @@ class WebDemoStage extends Stage with StageP {
     hgrow = Priority.Always
     vgrow = Priority.Never
   }
-  txfUrl.onAction = handle {txfUrlAction.trigger}
-
 
   scene = new Scene {
     fill = Color.LightGray
@@ -55,9 +49,16 @@ class WebDemoStage extends Stage with StageP {
     }
   }
 
-  val txfUrlAction = new Trigger
+  script..
+    live =;&&
+      gui: browser.engine.load("http://code.google.com/p/scalafx/")
+      callbacks...
 
-  script live =
-    gui: browser.engine.load("http://code.google.com/p/scalafx/")
-    txfUrlAction gui: browser.engine.load(txfUrl.text.get) ...
+    callbacks =;+
+      browser.onAlert             ~~(e: WebEvent[_])~~> println("onAlert: " + e)
+      browser.onStatusChanged     ~~(e: WebEvent[_])~~> println("onStatusChanged: " + e)
+      browser.onResized           ~~(e: WebEvent[_])~~> println("onResized: " + e)
+      browser.onVisibilityChanged ~~(e: WebEvent[_])~~> println("onVisibilityChanged: " + e)
+
+      txfUrl gui: browser.engine.load(txfUrl.text.get)
 }
