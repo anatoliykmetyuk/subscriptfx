@@ -45,49 +45,14 @@ class ButtonDemoStage extends Stage with StageP {
     }
   }
 
-  trait FXProcess extends SSProcess {
-    override script..
-      live = action
-
-    script action: Any
-  }
-
-  class ScriptBtn(btn: Button) extends FXProcess {
-
-    // `disable` belongs to Node, which is the parent of all the elements.
-    // `disable` something and it will stop reacting on anything, not only clicks.
-    // override script lifecycle =
-    //   gui: {btn.disable = false} super.lifecycle^ gui: {btn.disable = true}
-
-    script..
-      genericTriggerFor[T <: Event](handlerProp: ObjectProperty[EventHandler[T]]) =
-        var event: T = null.asInstanceOf[T]
-        @{handlerProp.setValue(new EventHandler[T] {
-          override def handle(e: T) {
-            event = e
-            there.codeExecutor.executeAA
-          }
-        })}: {..}
-        ^event
-
-
-      action = genericTriggerFor[ActionEvent](btn.onAction)
-      mousePressed = genericTriggerFor[MouseEvent](btn.onMousePressed.asInstanceOf[ObjectProperty[EventHandler[MouseEvent]]])
-      mouseEntered = genericTriggerFor[MouseEvent](btn.onMouseEntered.asInstanceOf[ObjectProperty[EventHandler[MouseEvent]]])
-
-      // and so on...
-  }
-
-  val b1 = new ScriptBtn(btn1)
-  val b2 = new ScriptBtn(btn2)
-
-  // Control
   script..
     live = handling...
 
     handling =;+
-      b1.mouseEntered ~~(e: MouseEvent)~~> println: e
-      b2.mousePressed ~~(e: MouseEvent)~~> println: e
+      btn1 ~~(_)~~> println("Button 1 is pressed")
+      btn2 ~~(_)~~> println("Button 2 is pressed")
+      btn1.onMouseEntered ~~(_)~~> println("Mouse entered in button 1")
+      btn2.onMouseExited  ~~(_)~~> println("Mouse left button 2")
 
 
 }
