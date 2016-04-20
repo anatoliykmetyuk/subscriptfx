@@ -7,9 +7,13 @@ import subscript.vm.N_code_eventhandling
 
 import javafx.event.{EventHandler, ActionEvent, Event}
 import javafx.beans.property.ObjectProperty
+import javafx.{event => jfx}
 
 import scalafx.Includes._
 import scalafx.{event => sfx}
+import scalafx.delegate.SFXDelegate
+
+import subscriptfx.Macros.jfxe2sfxe
 
 
 package object subscriptfx {
@@ -18,35 +22,35 @@ package object subscriptfx {
    * Once an event happens on that EventHandler, all the registered handlers are invoked.
    */
   object Listeners {
-    val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], mutable.Set[Event => Unit]]()
+    val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], Any]()  // cheating...
     
-    def listen[T <: EventHandler[_]](hp: ObjectProperty[T], h: Event => Unit) {
-      val handlers = listeners.getOrElseUpdate(hp, {
-        val hdlrs = mutable.Set[Event => Unit]()
+    def listen[J <: jfx.Event](hp: ObjectProperty[EventHandler[J]], h: J => Unit) {
+      val handlers: mutable.Set[J => Unit] = listeners.getOrElseUpdate(hp, {
+        val hdlrs = mutable.Set[J => Unit]()
         if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")
-        hp.setValue(new EventHandler[Event] {override def handle(e: Event) {hdlrs.foreach(_(e))}}.asInstanceOf[T])
+        hp.setValue(new EventHandler[J] {override def handle(e: J) {hdlrs.foreach(_(e))}})
         hdlrs
-      })
+      }).asInstanceOf[mutable.Set[J => Unit]]
 
       handlers += h
     }
 
-    def unlisten(hp: ObjectProperty[_ <: EventHandler[_]], h: Event => Unit) {
-      listeners(hp) -= h
+    def unlisten[J <: jfx.Event](hp: ObjectProperty[_ <: EventHandler[_]], h: J => Unit) {
+      listeners(hp).asInstanceOf[mutable.Set[J => Unit]] -= h
     }
   }
 
-  implicit script..
+  script..
 
     /**
      * Converts an ObjectProperty[EventHandler] to a script. This script
      * will wait for an event to happen on this EventHandler, then it will
      * have success with the result value set to the event that have happened.
      */
-    op2script(handlerProp: ObjectProperty[_ <: EventHandler[_]]) =
-      var event: sfx.Event = null
+    op2script[J <: jfx.Event, S <: sfx.Event with SFXDelegate[J]](handlerProp: ObjectProperty[EventHandler[J]])(implicit c: J => S) =
+      var event: S = null.asInstanceOf[S]
       @{
-        val handler = {e: Event =>
+        val handler = {e: J =>
           event = e
           there.codeExecutor.executeAA
         }
@@ -60,7 +64,7 @@ package object subscriptfx {
      * Experimental: converts an object with an onAction event handler to a script.
      * `act` is equivalent to `act.onAction`.
      */
-    act2script(act: {def onAction: ObjectProperty[EventHandler[ActionEvent]]}) = act.onAction
+    // act2script(act: {def onAction: ObjectProperty[EventHandler[ActionEvent]]}) = jfxe2sfxe(act.onAction)
 
   /**
    * Invokes `task` on the GUI thread. Waits for the code to be executed,

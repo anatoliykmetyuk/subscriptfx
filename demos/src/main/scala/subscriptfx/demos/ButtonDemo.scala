@@ -4,6 +4,7 @@ import subscript.language
 import subscript.Predef._
 import subscript.objectalgebra._
 
+import javafx.{event => jfx}
 import javafx.event.{EventHandler, ActionEvent, Event}
 import javafx.beans.property.ObjectProperty
 
@@ -16,10 +17,12 @@ import scalafx.scene.layout.{BorderPane, GridPane}
 import scalafx.event.EventIncludes._
 
 import scalafx.stage.Stage
+import scalafx.{event => sfx}
 
 import javafx.scene.input.MouseEvent
 
 import subscriptfx._
+import subscriptfx.Macros._
 
 // Main SubScriptFX Application
 object ButtonDemo extends SSFXApp {
@@ -45,14 +48,23 @@ class ButtonDemoStage extends Stage with StageP {
     }
   }
 
+  // script target[T <: jfx.Event](handlerProp: ObjectProperty[_ <: EventHandler[T]]) =
+  //   {!!}
+
+  // def foo() {
+  //   target(btn1.onMouseEntered)
+  // }
+
   script..
-    live = handling...
+    live =
+      // target[javafx.scene.input.MouseEvent](btn1.onMouseEntered)
+      handling...
 
     handling =;+
-      btn1 ~~(_)~~> println("Button 1 is pressed")
-      btn2 ~~(_)~~> println("Button 2 is pressed")
-      btn1.onMouseEntered ~~(_)~~> println("Mouse entered in button 1")
-      btn2.onMouseExited  ~~(_)~~> println("Mouse left button 2")
+      // btn1 ~~(_)~~> println("Button 1 is pressed")
+      // btn2 ~~(_)~~> println("Button 2 is pressed")
+      jfxe2sfxe(btn1.onMouseEntered) ~~(_)~~> println("Mouse entered in button 1")
+      // btn2.onMouseExited  ~~(_)~~> println("Mouse left button 2")
 
 
 }
