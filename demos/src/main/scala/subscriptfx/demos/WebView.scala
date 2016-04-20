@@ -4,6 +4,7 @@ import subscript.language
 import subscript.Predef._
 import subscript.objectalgebra._
 import subscriptfx._
+import subscriptfx.Macros._
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
@@ -16,6 +17,8 @@ import scalafx.scene.web._
 
 import scalafx.stage.Stage
 import scalafx.application.Platform
+
+import scalafx.scene.input.{KeyCode, KeyEvent}
 
 
 object WebDemo extends SSFXApp {
@@ -55,10 +58,10 @@ class WebDemoStage extends Stage with StageP {
       callbacks...
 
     callbacks =;+
-      // browser.onAlert             ~~(e: WebEvent[_])~~> println("onAlert: " + e)
+      browser.onAlert             ~~(e: WebEvent[_])~~> println("onAlert: " + e)
       browser.onStatusChanged     ~~(e: WebEvent[_])~~> println("onStatusChanged: " + e)
-      // browser.onResized           ~~(e: WebEvent[_])~~> println("onResized: " + e)
-      // browser.onVisibilityChanged ~~(e: WebEvent[_])~~> println("onVisibilityChanged: " + e)
+      browser.onResized           ~~(e: WebEvent[_])~~> println("onResized: " + e)
+      browser.onVisibilityChanged ~~(e: WebEvent[_])~~> println("onVisibilityChanged: " + e)
 
       txfUrl gui: browser.engine.load(txfUrl.text.get)
 }

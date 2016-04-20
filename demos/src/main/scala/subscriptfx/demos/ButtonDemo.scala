@@ -15,6 +15,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Label, Button}
 import scalafx.scene.layout.{BorderPane, GridPane}
 import scalafx.event.EventIncludes._
+import scalafx.Includes._
 
 import scalafx.stage.Stage
 import scalafx.{event => sfx}
@@ -61,10 +62,10 @@ class ButtonDemoStage extends Stage with StageP {
       handling...
 
     handling =;+
-      // btn1 ~~(_)~~> println("Button 1 is pressed")
-      // btn2 ~~(_)~~> println("Button 2 is pressed")
-      jfxe2sfxe(btn1.onMouseEntered) ~~(_)~~> println("Mouse entered in button 1")
-      // btn2.onMouseExited  ~~(_)~~> println("Mouse left button 2")
+      btn1 println("Button 1 pressed")
+      btn2 println("Button 2 pressed")
+      btn1.onMouseEntered  println("Mouse entered in button 1")
+      btn2.onMouseExited   println("Mouse left button 2")
 
 
 }
