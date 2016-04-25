@@ -29,7 +29,7 @@ object Macros {
       case t => t.typeArgs.head         // `tpe` is EventHandler[X]
     }
 
-    val callTree = q"subscriptfx.op2script[$bound, scalafx.event.Event with scalafx.delegate.SFXDelegate[$bound]](${target.tree}.asInstanceOf[javafx.beans.property.ObjectProperty[javafx.event.EventHandler[_ >: $bound]]])"
+    val callTree = q"subscriptfx.op2script[$bound, scalafx.event.Event with scalafx.delegate.SFXDelegate[$bound]](${target.tree}.asInstanceOf[javafx.beans.property.ObjectProperty[javafx.event.EventHandler[$bound]]])"
     // subscript.DSL._maybeCall(${calleeName.tree}, $exprTree)
     c.Expr[TemplateNode.Child] {q"""subscript.DSL._maybeCall("macro_call", (here: subscript.vm.N_call[Any]) => $callTree)"""}
   }

@@ -24,7 +24,7 @@ package object subscriptfx {
   object Listeners {
     val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], Any]()  // cheating...
     
-    def listen[J <: jfx.Event](hp: ObjectProperty[EventHandler[_ >: J]], h: J => Unit) {
+    def listen[J <: jfx.Event](hp: ObjectProperty[EventHandler[J]], h: J => Unit) {
       val handlers: mutable.Set[J => Unit] = listeners.getOrElseUpdate(hp, {
         val hdlrs = mutable.Set[J => Unit]()
         if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")
@@ -35,7 +35,7 @@ package object subscriptfx {
       handlers += h
     }
 
-    def unlisten[J <: jfx.Event](hp: ObjectProperty[EventHandler[_ >: J]], h: J => Unit) {
+    def unlisten[J <: jfx.Event](hp: ObjectProperty[EventHandler[J]], h: J => Unit) {
       listeners(hp).asInstanceOf[mutable.Set[J => Unit]] -= h
     }
   }
@@ -47,7 +47,7 @@ package object subscriptfx {
      * will wait for an event to happen on this EventHandler, then it will
      * have success with the result value set to the event that have happened.
      */
-    op2script[J <: jfx.Event, S <: sfx.Event with SFXDelegate[J]](handlerProp: ObjectProperty[EventHandler[_ >: J]])(implicit c: J => S) =
+    op2script[J <: jfx.Event, S <: sfx.Event with SFXDelegate[J]](handlerProp: ObjectProperty[EventHandler[J]])(implicit c: J => S) =
       var event: S = null.asInstanceOf[S]
       @{
         val handler = {e: J =>
