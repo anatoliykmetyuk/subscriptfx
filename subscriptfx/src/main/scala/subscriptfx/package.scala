@@ -25,11 +25,12 @@ package object subscriptfx {
     val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], mutable.Set[(_ <: jfx.Event) => Unit]]()
     
     def listen[J <: jfx.Event](hp: ObjectProperty[EventHandler[J]], h: J => Unit) {
+      // Get the set of listeners associated with `hp`. Create it if not present.
       val handlers: mutable.Set[J => Unit] = listeners.getOrElseUpdate(hp, {
         val hdlrs = mutable.Set[J => Unit]()
-        if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")
+        if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")  // Just in case user has already set this property manualy. We don't want to make him wonder why does his behaviour not work.
         hp.setValue(new EventHandler[J] {override def handle(e: J) {hdlrs.foreach(_(e))}})
-        hdlrs.asInstanceOf[mutable.Set[(_ <: jfx.Event) => Unit]]
+        hdlrs.asInstanceOf[mutable.Set[(_ <: jfx.Event) => Unit]]  // Too bad Set is invariant in its type
       }).asInstanceOf[mutable.Set[J => Unit]]
 
       handlers += h
@@ -51,7 +52,7 @@ package object subscriptfx {
       var event: S = null.asInstanceOf[S]
       @{
         val handler = {e: J =>
-          event = e
+          event = e  // Use a ScalaFX's implicit conversion `J => S` to wrap JavaFX event `e` into a ScalaFX event
           there.codeExecutor.executeAA
         }
 
@@ -60,11 +61,10 @@ package object subscriptfx {
       }: {..}
       ^event
 
-    /**
-     * Experimental: converts an object with an onAction event handler to a script.
-     * `act` is equivalent to `act.onAction`.
-     */
-  
+  /**
+   * Experimental: converts an object with an onAction event handler to a script.
+   * `act` is equivalent to `act.onAction`.
+   */
   implicit script act2script(act: {def onAction: ObjectProperty[EventHandler[ActionEvent]]}) = act.onAction
 
   /**
