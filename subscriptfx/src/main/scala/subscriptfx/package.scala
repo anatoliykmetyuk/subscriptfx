@@ -17,19 +17,19 @@ import subscriptfx.Macros.jfxe2sfxe
 
 
 package object subscriptfx {
-  /**
-   * Keeps track of the handlers registered on certain ObjectProperty[EventHandler] from scripts.
-   * Once an event happens on that EventHandler, all the registered handlers are invoked.
-   */
-  object Listeners {
-    val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], Any]()  // cheating...
+
+  // Keeps track of the handlers registered on certain ObjectProperty[EventHandler] from scripts.
+  // Once an event happens on that EventHandler, all the registered handlers are invoked.
+  private[subscriptfx] object Listeners {
+    // Every event-handling property such as `onAction` gets associated with a set of handlers to be invoked when it happens
+    val listeners = mutable.Map[ObjectProperty[_ <: EventHandler[_]], mutable.Set[(_ <: jfx.Event) => Unit]]()
     
     def listen[J <: jfx.Event](hp: ObjectProperty[EventHandler[J]], h: J => Unit) {
       val handlers: mutable.Set[J => Unit] = listeners.getOrElseUpdate(hp, {
         val hdlrs = mutable.Set[J => Unit]()
         if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")
         hp.setValue(new EventHandler[J] {override def handle(e: J) {hdlrs.foreach(_(e))}})
-        hdlrs
+        hdlrs.asInstanceOf[mutable.Set[(_ <: jfx.Event) => Unit]]
       }).asInstanceOf[mutable.Set[J => Unit]]
 
       handlers += h
