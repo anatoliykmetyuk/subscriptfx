@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 , libraryDependencies ++= Seq(
-    "org.subscript-lang" %% "subscript-swing" % "3.0.3"
+    "org.subscript-lang" %% "subscript-swing" % "3.0.5"
   , "org.scalafx" %% "scalafx" % "8.0.60-R9"
   )
 )
