@@ -20,7 +20,8 @@ import scalafx.Includes._
 import scalafx.stage.Stage
 import scalafx.{event => sfx}
 
-import javafx.scene.input.MouseEvent
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.input.{KeyCode, KeyEvent}
 
 import subscriptfx._
 import subscriptfx.Macros._
@@ -54,12 +55,11 @@ class LookupFrameStage extends Stage with StageP {
     }
   }
 
-
   script..
     live              = ... searchSequence
 
     searchSequence    = searchCommand showSearchingText searchInDatabase showSearchResults
-    searchCommand     = searchButton //+ Key.Enter
+    searchCommand     = searchButton //+ KeyCode.Enter
 
     showSearchingText = gui: {outputTA.text = "Searching: "+searchTF.text()}
     showSearchResults = gui: {outputTA.text = "Found: "+here.index+" items"}
