@@ -63,8 +63,8 @@ class LookupFrameStage extends Stage with StageP {
     searchSequence    = searchCommand showSearchingText searchInDatabase showSearchResults
     searchCommand     = searchButton + KeyCode.Enter
 
-    showSearchingText = gui: {outputTA.text = "Searching: "+searchTF.text()}
-    showSearchResults = gui: {outputTA.text = "Found: "+here.index+" items"}
+    showSearchingText = @gui: let outputTA.text = "Searching: "+searchTF.text()
+    showSearchResults = @gui: let outputTA.text = "Found: "+here.index+" items"
     searchInDatabase  = sleep: 2000 // simulate a time consuming action
 
 }

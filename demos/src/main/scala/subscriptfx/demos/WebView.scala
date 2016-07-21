@@ -54,7 +54,7 @@ class WebDemoStage extends Stage with StageP {
 
   script..
     live =;&&
-      gui: browser.engine.load("http://code.google.com/p/scalafx/")
+      @gui: let browser.engine.load("http://code.google.com/p/scalafx/")
       callbacks...
 
     callbacks =;+
@@ -63,5 +63,5 @@ class WebDemoStage extends Stage with StageP {
       browser.onResized           ~~(e: WebEvent[_])~~> println("onResized: " + e)
       browser.onVisibilityChanged ~~(e: WebEvent[_])~~> println("onVisibilityChanged: " + e)
 
-      txfUrl gui: browser.engine.load(txfUrl.text.get)
+      txfUrl @gui: let browser.engine.load(txfUrl.text.get)
 }

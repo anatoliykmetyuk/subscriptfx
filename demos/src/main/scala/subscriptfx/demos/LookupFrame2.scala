@@ -14,6 +14,7 @@ import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.layout.{BorderPane, GridPane, FlowPane}
+import scalafx.stage.WindowEvent
 import scalafx.Includes._
 
 import scalafx.stage.Stage
@@ -31,7 +32,7 @@ object LookupFrame2 extends SSFXApp {
   script live = stg
 }
 
-class LookupFrame2Stage extends Stage with StageP {
+class LookupFrame2Stage extends Stage with StageP {self =>
   title  = "LookupFrame2 - Subscript"
   x      = 100
   y      = 100
@@ -56,31 +57,39 @@ class LookupFrame2Stage extends Stage with StageP {
     }
   }
   
-  // def confirmExit: Boolean = Dialog.showConfirmation(null, "Are you sure?", "About to exit")==Dialog.Result.Yes
+  def confirmExit: Boolean = new Alert(Alert.AlertType.Confirmation) {
+    initOwner(self)
+    title = "About to exit"
+    headerText = "Are you sure?"
+    contentText = "Really?"
+  }.showAndWait() match {
+    case Some(ButtonType.OK) => true
+    case _                   => false
+  }
 
   implicit script keyCode2script(k: KeyCode) =
     keyCode2scriptBuilder(searchTF, k, KeyEvent.KeyReleased)
 
   script..
-    live              = ... searchSequence //|| doExit
+    live              = ... searchSequence || doExit
 
     searchCommand     = searchButton + KeyCode.Enter
     cancelCommand     = cancelButton + KeyCode.Escape 
-    // exitCommand       =   exitButton + windowClosing: top
+    exitCommand       =   exitButton + eventTrigger(this, WindowEvent.WindowCloseRequest)
     
-    // doExit            =   exitCommand @gui: {!confirmExit!} ~~(r:Boolean)~~> while (!r)
+    doExit            =   exitCommand @gui: {!confirmExit!} ~~(r:Boolean)~~> while (!r)
     cancelSearch      = cancelCommand showCanceledText
     
     searchSequence    = guard: searchTF, !searchTF.text().trim.isEmpty, KeyEvent.KeyTyped
                         searchCommand
                         showSearchingText searchInDatabase showSearchResults / cancelSearch
     
-    showSearchingText = gui: {outputTA.text = "Searching: "+searchTF.text()+"\n"}
-    showCanceledText  = gui: {outputTA.text = "Searching Canceled"}
-    showSearchResults = gui: {outputTA.text = "Results: 1, 2, 3"}
+    showSearchingText = @gui: let outputTA.text = "Searching: "+searchTF.text()+"\n"
+    showCanceledText  = @gui: let outputTA.text = "Searching Canceled"
+    showSearchResults = @gui: let outputTA.text = "Results: 1, 2, 3"
 
     searchInDatabase  = sleep: 5000 || progressMonitor
     
-    progressMonitor   = ... gui: {outputTA.text = outputTA.text() + here.pass + " "} sleep: 200
+    progressMonitor   = ... @gui: {outputTA.text = outputTA.text() + here.pass + " "} sleep: 200
     
 }

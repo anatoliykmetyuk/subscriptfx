@@ -2,9 +2,11 @@ import subscript.language
 import subscript.Predef._
 import subscript.objectalgebra.Trigger
 
-import scala.collection.mutable
+import subscript.vm._
+import subscript.vm.model.callgraph._
 
-import subscript.vm.{N_code_eventhandling, Script}
+
+import scala.collection.mutable
 
 import javafx.event.{EventHandler, ActionEvent, Event}
 import javafx.beans.property.ObjectProperty
@@ -68,7 +70,7 @@ package object subscriptfx {
      * Invokes `task` on the GUI thread. Waits for the code to be executed,
      * then has success.
      */
-    gui(task: => Unit) = SSPlatform.runAndWait(task)
+    // gui(task: => Unit) = SSPlatform.runAndWait(task)
 
     /**
      * ScalaFX understands many more events than Swing. So it is necessary to specify
@@ -116,7 +118,7 @@ package object subscriptfx {
    * @return a Trigger implicitly converted to Script[Any]. Will trigger if the event of the
    * desired type arrives and if predicate(event) is true.
    */
-  def eventTrigger[J <: jfx.Event, S <: SFXDelegate[J]](obj: EventHandlerDelegate, eType: sfx.EventType[J], predicate: S => Boolean)(implicit jfx2sfx: J => S): Script[Any] = {
+  def eventTrigger[J <: jfx.Event, S <: SFXDelegate[J]](obj: EventHandlerDelegate, eType: sfx.EventType[J], predicate: S => Boolean = (e: Any) => true)(implicit jfx2sfx: J => S): Script[Any] = {
     val trigger = new Trigger
     lazy val handler: EventHandler[J] = {e: S => if (predicate(e)) {
       trigger.trigger(e)
@@ -138,6 +140,46 @@ package object subscriptfx {
   def keyCode2scriptBuilder(obj: EventHandlerDelegate, k: KeyCode, eType: EventType[javafx.scene.input.KeyEvent]): Script[Any] =
     eventTrigger(obj, eType, {e: KeyEvent => e.code == k})
 
+  def gui [N<:CallGraphNode](implicit there:N)  = {there.asInstanceOf[CallGraphNode]adaptExecutor(new FXCodeExecutorAdapter[Unit, CodeExecutorTrait])}
+
+  class FXCodeExecutorAdapter[R,CE<:CodeExecutorTrait] extends CodeExecutorAdapter[R,CE]{
+    def n = adaptee.n
+    def scriptExecutor = adaptee.scriptExecutor
+  
+    override def      executeAA: Unit = {
+      adaptee.regardStartAndEndAsSeparateAtomicActions = adaptee.asynchronousAllowed
+      adaptee.executeAA(this) // Not to be called? TBD: clean up class/trait hierarchy
+    }
+    override def afterExecuteAA_internal: Unit = adaptee.afterExecuteAA_internal  // TBD: clean up class/trait hierarchy so that this def can be ditched
+    override def    interruptAA: Unit = adaptee.interruptAA     // TBD: clean up class/trait hierarchy so that this def can be ditched
+    override def doCodeExecution[R](code: =>R): R = {
+  
+      // we need here the default value for R (false, 0, null or a "Unit")
+      // for some strange reason, the following line would go wrong:
+      //
+      // var result: R = _
+      //
+      // A solution using a temporary class was found at
+      // http://missingfaktor.blogspot.com/2011/08/emulating-cs-default-keyword-in-scala.html
+      var result: R = null.asInstanceOf[R]
+      // luckily we have the default value for type R now...
+  
+      if (adaptee.asynchronousAllowed) {
+        var runnable = new Runnable {
+          def run(): Unit = {result = adaptee.doCodeExecution(code)}
+        }
+        SSPlatform.invokeLater(runnable)
+      }
+      else {
+        var runnable = new Runnable {
+          def run(): Unit = {result = adaptee.doCodeExecution(code)}
+        }
+        SSPlatform.invokeAndWait(runnable)
+      }
+      result
+    }
+  }
+  
 
   // Interesting thing below: the foo code doens't give the compile-time
   // error, but the bar code does (when handler is set to EventHandler[Event]).
