@@ -34,7 +34,7 @@ package object subscriptfx {
       val handlers: mutable.Set[J => Unit] = listeners.getOrElseUpdate(hp, {
         val hdlrs = mutable.Set[J => Unit]()
         if (hp.getValue ne null) throw new IllegalStateException("You cannot set the `on` listeners both from a SubScript script and from a Scala code")  // Just in case user has already set this property manualy. We don't want to make him wonder why does his behaviour not work.
-        hp.setValue(new EventHandler[J] {override def handle(e: J) {hdlrs.foreach(_(e))}})
+        hp.setValue(new EventHandler[J] {override def handle(e: J) {hdlrs.foreach {h => if (!e.isConsumed) h(e)}}})
         hdlrs.asInstanceOf[mutable.Set[(_ <: jfx.Event) => Unit]]  // Too bad Set is invariant in its type
       }).asInstanceOf[mutable.Set[J => Unit]]
 
@@ -58,6 +58,7 @@ package object subscriptfx {
       @{
         val handler = {e: J =>
           event = e  // Use a ScalaFX's implicit conversion `J => S` to wrap JavaFX event `e` into a ScalaFX event
+          e.consume()
           there.codeExecutor.executeAA
         }
 
