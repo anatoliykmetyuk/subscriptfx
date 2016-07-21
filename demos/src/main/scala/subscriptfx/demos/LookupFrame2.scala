@@ -62,7 +62,7 @@ class LookupFrame2Stage extends Stage with StageP {
     keyCode2scriptBuilder(searchTF, k, KeyEvent.KeyReleased)
 
   script..
-    live              = ... searchSequence// || doExit
+    live              = ... searchSequence //|| doExit
 
     searchCommand     = searchButton + KeyCode.Enter
     cancelCommand     = cancelButton + KeyCode.Escape 
@@ -71,7 +71,7 @@ class LookupFrame2Stage extends Stage with StageP {
     // doExit            =   exitCommand @gui: {!confirmExit!} ~~(r:Boolean)~~> while (!r)
     cancelSearch      = cancelCommand showCanceledText
     
-    searchSequence    = //guard: searchTF, !searchTF.text.trim.isEmpty
+    searchSequence    = guard: searchTF, !searchTF.text().trim.isEmpty, KeyEvent.KeyTyped
                         searchCommand
                         showSearchingText searchInDatabase showSearchResults / cancelSearch
     

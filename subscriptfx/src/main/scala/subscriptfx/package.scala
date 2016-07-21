@@ -63,6 +63,33 @@ package object subscriptfx {
         there.onDeactivate {Listeners.unlisten[J](handlerProp, handler)}
       }: {..}
       ^event
+  
+    /**
+     * Invokes `task` on the GUI thread. Waits for the code to be executed,
+     * then has success.
+     */
+    gui(task: => Unit) = SSPlatform.runAndWait(task)
+
+    /**
+     * ScalaFX understands many more events than Swing. So it is necessary to specify
+     * the events the Guard is interested in explicitly via `trigger` parameter, so that
+     * it doesn't interfere with other application event handlers. For example, on a text field,
+     * we may be interested only in the KeyTyped events when the user typed a key, but not an
+     * event when the user releases the Enter key.
+     * 
+     * See more user-friendly version of this method below.
+     */
+    guard(comp: EventHandlerDelegate, test: => Boolean, trigger: EventHandlerDelegate => Script[Any] = eventTrigger(_, Event.ANY, (_: sfx.Event) => true)): Any =
+      if test then ..? else ...
+      trigger(comp)
+
+    /**
+     * Allows you to specify the events you're interested in directly via EventType class
+     * instead of the trigger function.
+     */
+    guard[J <: jfx.Event, S <: SFXDelegate[J]](comp: EventHandlerDelegate, test: => Boolean, eType: sfx.EventType[J])(implicit jfs2sfx: J => S): Any =
+      guard: comp, test, {c: EventHandlerDelegate => eventTrigger(c, eType, (_: S) => true)}
+
 
   type HasActionAndDisable = {
     def onAction: ObjectProperty[EventHandler[ActionEvent]]
@@ -74,15 +101,10 @@ package object subscriptfx {
    */
   implicit script act2script(act: HasActionAndDisable) =
     @{
-      there.onDeactivate {act.disable_=(true) }
+      there.onDeactivate {if (Listeners.listeners(act.onAction).isEmpty) act.disable_=(true)}
       there.onActivate   {act.disable_=(false)}
     }: act.onAction
 
-  /**
-   * Invokes `task` on the GUI thread. Waits for the code to be executed,
-   * then has success.
-   */
-  script gui(task: => Unit) = SSPlatform.runAndWait(task)
 
   /**
    * Used to construct triggers that trigger on certain events.
