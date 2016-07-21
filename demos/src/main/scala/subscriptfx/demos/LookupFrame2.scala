@@ -56,33 +56,31 @@ class LookupFrame2Stage extends Stage with StageP {
     }
   }
   
-  script live = {..}
   // def confirmExit: Boolean = Dialog.showConfirmation(null, "Are you sure?", "About to exit")==Dialog.Result.Yes
 
-  // implicit script keyCode2script(k: KeyCode) =
-  //   keyCode2scriptBuilder(searchTF, k, KeyEvent.KeyReleased)
+  implicit script keyCode2script(k: KeyCode) =
+    keyCode2scriptBuilder(searchTF, k, KeyEvent.KeyReleased)
 
-  // script..
+  script..
+    live              = ... searchSequence// || doExit
 
-  //   live              = ... searchSequence || doExit
+    searchCommand     = searchButton + KeyCode.Enter
+    cancelCommand     = cancelButton + KeyCode.Escape 
+    // exitCommand       =   exitButton + windowClosing: top
+    
+    // doExit            =   exitCommand @gui: {!confirmExit!} ~~(r:Boolean)~~> while (!r)
+    cancelSearch      = cancelCommand showCanceledText
+    
+    searchSequence    = //guard: searchTF, !searchTF.text.trim.isEmpty
+                        searchCommand
+                        showSearchingText searchInDatabase showSearchResults / cancelSearch
+    
+    showSearchingText = gui: {outputTA.text = "Searching: "+searchTF.text()+"\n"}
+    showCanceledText  = gui: {outputTA.text = "Searching Canceled"}
+    showSearchResults = gui: {outputTA.text = "Results: 1, 2, 3"}
 
-  //   searchCommand     = searchButton + Key.Enter
-  //   cancelCommand     = cancelButton + Key.Escape 
-  //   exitCommand       =   exitButton + windowClosing: top
+    searchInDatabase  = sleep: 5000 || progressMonitor
     
-  //   doExit            =   exitCommand @gui: {!confirmExit!} ~~(r:Boolean)~~> while (!r)
-  //   cancelSearch      = cancelCommand showCanceledText
-    
-  //   searchSequence    = guard: searchTF, !searchTF.text.trim.isEmpty
-  //                       searchCommand
-  //                       showSearchingText searchInDatabase showSearchResults / cancelSearch
-    
-  //   showSearchingText = @gui: let outputTA.text = "Searching: "+searchTF.text
-  //   showCanceledText  = @gui: let outputTA.text = "Searching Canceled"
-  //   showSearchResults = @gui: let outputTA.text = "Results: 1, 2, 3"
-
-  //   searchInDatabase  = {* sleep(5000) *} || progressMonitor
-    
-  //   progressMonitor   = ... @gui: {outputTA.text+=here.pass} do* sleep(200)
+    progressMonitor   = ... gui: {outputTA.text = outputTA.text() + here.pass + " "} sleep: 200
     
 }
