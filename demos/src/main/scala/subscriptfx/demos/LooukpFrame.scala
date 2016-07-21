@@ -39,7 +39,7 @@ class LookupFrameStage extends Stage with StageP {
   height = 300
 
   val outputTA     = new TextArea        {editable      = false}
-  val searchButton = new Button("Go")    {disable       = false}
+  val searchButton = new Button("Go")    {disable       = true }
   val searchLabel  = new Label("Search")
   val searchTF     = new TextField
 
