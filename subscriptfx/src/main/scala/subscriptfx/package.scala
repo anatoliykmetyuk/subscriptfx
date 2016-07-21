@@ -64,11 +64,19 @@ package object subscriptfx {
       }: {..}
       ^event
 
+  type HasActionAndDisable = {
+    def onAction: ObjectProperty[EventHandler[ActionEvent]]
+    def disable_=(v: Boolean): Unit
+  }
   /**
    * Experimental: converts an object with an onAction event handler to a script.
-   * `act` is equivalent to `act.onAction`.
+   * Disables the object if it is not listened to.
    */
-  implicit script act2script(act: {def onAction: ObjectProperty[EventHandler[ActionEvent]]}) = act.onAction
+  implicit script act2script(act: HasActionAndDisable) =
+    @{
+      there.onDeactivate {act.disable_=(true) }
+      there.onActivate   {act.disable_=(false)}
+    }: act.onAction
 
   /**
    * Invokes `task` on the GUI thread. Waits for the code to be executed,
