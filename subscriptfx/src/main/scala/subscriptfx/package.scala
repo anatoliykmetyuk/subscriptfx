@@ -1,9 +1,10 @@
 import subscript.language
 import subscript.Predef._
+import subscript.objectalgebra.Trigger
 
 import scala.collection.mutable
 
-import subscript.vm.N_code_eventhandling
+import subscript.vm.{N_code_eventhandling, Script}
 
 import javafx.event.{EventHandler, ActionEvent, Event}
 import javafx.beans.property.ObjectProperty
@@ -12,6 +13,8 @@ import javafx.{event => jfx}
 import scalafx.Includes._
 import scalafx.{event => sfx}
 import scalafx.delegate.SFXDelegate
+import scalafx.event.{EventHandlerDelegate, EventType}
+import scalafx.scene.input.{KeyCode, KeyEvent}
 
 import subscriptfx.Macros.jfxe2sfxe
 
@@ -72,6 +75,38 @@ package object subscriptfx {
    * then has success.
    */
   script gui(task: => Unit) = SSPlatform.runAndWait(task)
+
+  /**
+   * Used to construct triggers that trigger on certain events.
+   * 
+   * @param obj the object that will listen to the events.
+   * @param eType the type of the expected event. Usually the companion objects of the target event class have instances of the EventType class.
+   * @param predicate defines on which events to trigger.
+   * 
+   * @return a Trigger implicitly converted to Script[Any]. Will trigger if the event of the
+   * desired type arrives and if predicate(event) is true.
+   */
+  def eventTrigger[J <: jfx.Event, S <: SFXDelegate[J]](obj: EventHandlerDelegate, eType: sfx.EventType[J], predicate: S => Boolean)(implicit jfx2sfx: J => S): Script[Any] = {
+    val trigger = new Trigger
+    lazy val handler: EventHandler[J] = {e: S => if (predicate(e)) {
+      trigger.trigger(e)
+      obj.removeEventHandler[J](eType, handler)
+    }}
+    
+    obj.addEventHandler[J](eType, handler)
+    trigger
+  }
+
+  /**
+   * Used to build implicit conversions from KeyCode to script, so that it is possible to write
+   * things like KeyCode.Enter in a script.
+   * 
+   * @param obj an object that will listen to the keyboard.
+   * @param k the particular key to listen to, can be obtained from the KeyCode object.
+   * @param eType one of the fields defined in the KeyEvent object.
+   */
+  def keyCode2scriptBuilder(obj: EventHandlerDelegate, k: KeyCode, eType: EventType[javafx.scene.input.KeyEvent]): Script[Any] =
+    eventTrigger(obj, eType, {e: KeyEvent => e.code == k})
 
 
   // Interesting thing below: the foo code doens't give the compile-time

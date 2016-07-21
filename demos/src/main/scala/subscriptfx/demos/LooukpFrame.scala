@@ -14,7 +14,6 @@ import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.layout.{BorderPane, GridPane, FlowPane}
-import scalafx.event.EventIncludes._
 import scalafx.Includes._
 
 import scalafx.stage.Stage
@@ -55,11 +54,14 @@ class LookupFrameStage extends Stage with StageP {
     }
   }
 
+  implicit script keyCode2script(k: KeyCode) =
+    keyCode2scriptBuilder(searchTF, k, KeyEvent.KeyReleased)
+
   script..
     live              = ... searchSequence
 
     searchSequence    = searchCommand showSearchingText searchInDatabase showSearchResults
-    searchCommand     = searchButton //+ KeyCode.Enter
+    searchCommand     = searchButton + KeyCode.Enter
 
     showSearchingText = gui: {outputTA.text = "Searching: "+searchTF.text()}
     showSearchResults = gui: {outputTA.text = "Found: "+here.index+" items"}
