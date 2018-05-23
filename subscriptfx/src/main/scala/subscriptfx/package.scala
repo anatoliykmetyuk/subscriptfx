@@ -17,6 +17,7 @@ import scalafx.{event => sfx}
 import scalafx.delegate.SFXDelegate
 import scalafx.event.{EventHandlerDelegate, EventType}
 import scalafx.scene.input.{KeyCode, KeyEvent}
+import scalafx.application.Platform
 
 import subscriptfx.Macros.jfxe2sfxe
 
@@ -104,8 +105,12 @@ package object subscriptfx {
    */
   implicit script act2script(act: HasActionAndDisable) =
     @{
-      there.onDeactivate {if (Listeners.listeners(act.onAction).isEmpty) act.disable_=(true)}
-      there.onActivate   {act.disable_=(false)}
+      def disable(flag: Boolean): Unit =
+        if (Platform.isFxApplicationThread) act.disable_=(flag)
+        else Platform.runLater { act.disable_=(flag) }
+
+      there.onDeactivate { if (Listeners.listeners(act.onAction).isEmpty) disable(true) }
+      there.onActivate   { disable(false) }
     }: act.onAction
 
 

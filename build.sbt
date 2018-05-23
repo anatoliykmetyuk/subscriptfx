@@ -4,7 +4,7 @@ lazy val repositoryUrl = "git://github.com/scala-subscript/subscriptfx.git"
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 , organization := "org.subscript-lang"
-, version      := "0.0.1"
+, version      := "0.0.2"
 
 , libraryDependencies ++= Seq(
     "org.subscript-lang" %% "subscript-swing" % "3.0.5"
